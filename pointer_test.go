@@ -1,6 +1,7 @@
 package jsonpointer
 
 import (
+	"bytes"
 	"errors"
 	"testing"
 )
@@ -139,6 +140,70 @@ func TestPointerGet(t *testing.T) {
 	}
 }
 
+func TestPointerMarshalText(t *testing.T) {
+	t.Parallel()
+
+	ptrs := [][]byte{
+		[]byte(""),
+		[]byte("/"),
+		[]byte("//"),
+		[]byte("/~0"),
+		[]byte("/~1"),
+		[]byte("/~01"),
+		[]byte("/~10"),
+		[]byte("/0"),
+		[]byte("/01"),
+		[]byte("/1"),
+		[]byte("/a/b/c"),
+	}
+
+	for _, ptr := range ptrs {
+		var p Pointer
+		if err := p.UnmarshalText(ptr); err != nil {
+			t.Fatalf("Pointer.UnmarshalText(%s) = %v, want <nil>", ptr, err)
+		}
+
+		d, err := p.MarshalText()
+		if err != nil {
+			t.Fatalf("Pointer.MarshalText() = %v, want <nil>", err)
+		}
+
+		if !bytes.Equal(d, ptr) {
+			t.Errorf("Pointer.MarshalText() = %s, want %s", d, ptr)
+		}
+	}
+}
+
+func TestPointerString(t *testing.T) {
+	t.Parallel()
+
+	ptrs := []string{
+		"",
+		"/",
+		"//",
+		"/~0",
+		"/~1",
+		"/~01",
+		"/~10",
+		"/0",
+		"/01",
+		"/1",
+		"/a/b/c",
+	}
+
+	for _, ptr := range ptrs {
+		p, err := Parse(ptr)
+		if err != nil {
+			t.Fatalf("Parse(%s) = %v, want <nil>", ptr, err)
+		}
+
+		s := p.String()
+		if s != ptr {
+			t.Errorf("Pointer.String() = %s, want %s", s, ptr)
+		}
+	}
+}
+
 func BenchmarkGet(b *testing.B) {
 	b.ReportAllocs()
 
@@ -164,7 +229,6 @@ func BenchmarkGet(b *testing.B) {
 func BenchmarkParse(b *testing.B) {
 	b.ReportAllocs()
 
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := Parse("/A/2/B")
 		if err != nil {
@@ -196,6 +260,52 @@ func BenchmarkPointerGet(b *testing.B) {
 		_, err = ptr.Get(value)
 		if err != nil {
 			b.Fatalf("Pointer.Get() = %v, want <nil>", err)
+		}
+	}
+}
+
+func BenchmarkPointerMarshalText(b *testing.B) {
+	b.ReportAllocs()
+
+	p, err := Parse("/A/2/B")
+	if err != nil {
+		b.Fatalf("Parse() = %v, want <nil>", err)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := p.MarshalText()
+		if err != nil {
+			b.Fatalf("Pointer.MarshalText() = %v, want <nil>", err)
+		}
+	}
+}
+
+func BenchmarkPointerString(b *testing.B) {
+	b.ReportAllocs()
+
+	p, err := Parse("/A/2/B")
+	if err != nil {
+		b.Fatalf("Parse() = %v, want <nil>", err)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = p.String()
+	}
+}
+
+func BenchmarkPointerUnmarshalText(b *testing.B) {
+	b.ReportAllocs()
+
+	data := []byte("/A/2/B")
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		var p Pointer
+		err := p.UnmarshalText(data)
+		if err != nil {
+			b.Fatalf("Pointer.UnmarshalText() = %v, want <nil>", err)
 		}
 	}
 }
