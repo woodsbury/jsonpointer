@@ -7,14 +7,15 @@ import (
 	"unicode"
 )
 
-func structField(field string, value reflect.Value) (any, bool) {
+func structField(field string, value *reflect.Value) bool {
 	fields := getStructFields(value.Type())
 	i, ok := fields[field]
 	if !ok {
-		return nil, false
+		return false
 	}
 
-	return value.FieldByIndex(i).Interface(), true
+	*value = value.FieldByIndex(i)
+	return true
 }
 
 type structFields map[string][]int
