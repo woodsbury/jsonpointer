@@ -27,13 +27,10 @@ func parseToken(tok string) (token, error) {
 		}
 
 		if r := tok[0]; r >= '1' && r <= '9' {
-			index, err := strconv.Atoi(tok)
-			if err == nil {
-				return token{
-					field: tok,
-					index: index,
-				}, nil
-			}
+			return token{
+				field: tok,
+				index: atoi(tok),
+			}, nil
 		}
 
 		return token{
@@ -143,4 +140,18 @@ func parseTokenBytes(tok []byte) (token, error) {
 		b.Write(remaining[:i])
 		remaining = remaining[i:]
 	}
+}
+
+func atoi(s string) int {
+	var n int
+	for _, r := range s {
+		t := n*10 + int(r-'0')
+		if t < n {
+			return -1
+		}
+
+		n = t
+	}
+
+	return n
 }
