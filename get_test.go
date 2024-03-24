@@ -67,12 +67,43 @@ func TestGet(t *testing.T) {
 	if result != "C" || err != nil {
 		t.Fatalf("Get() = (%v, %v), want (C, <nil>)", result, err)
 	}
+
+	ptr = "/A/2"
+
+	value = map[string]any{
+		"A": []any{
+			nil,
+			nil,
+			nil,
+		},
+	}
+
+	result, err = Get(ptr, value)
+	if result != nil || err != nil {
+		t.Fatalf("Get() = (%v, %v), want (<nil>, <nil>)", result, err)
+	}
+
+	value = &D{
+		D: []any{
+			nil,
+			nil,
+			nil,
+		},
+	}
+
+	result, err = Get(ptr, value)
+	if result != nil || err != nil {
+		t.Fatalf("Get() = (%v, %v), want (<nil>, <nil>)", result, err)
+	}
 }
 
 func TestPointerGet(t *testing.T) {
 	t.Parallel()
 
-	ptr := "/A/2/B"
+	ptr, err := Parse("/A/2/B")
+	if err != nil {
+		t.Fatalf("Parse(/A/2/B) = %v, want <nil>", err)
+	}
 
 	var value any = map[string]any{
 		"A": []any{
@@ -84,12 +115,7 @@ func TestPointerGet(t *testing.T) {
 		},
 	}
 
-	p, err := Parse(ptr)
-	if err != nil {
-		t.Fatalf("Parse(%s) = %v, want <nil>", ptr, err)
-	}
-
-	result, err := p.Get(value)
+	result, err := ptr.Get(value)
 	if result != "C" || err != nil {
 		t.Fatalf("Get() = (%v, %v), want (C, <nil>)", result, err)
 	}
@@ -112,7 +138,7 @@ func TestPointerGet(t *testing.T) {
 		},
 	}
 
-	result, err = p.Get(value)
+	result, err = ptr.Get(value)
 	if result != "C" || err != nil {
 		t.Fatalf("Get() = (%v, %v), want (C, <nil>)", result, err)
 	}
@@ -135,9 +161,40 @@ func TestPointerGet(t *testing.T) {
 		},
 	}
 
-	result, err = Get(ptr, value)
+	result, err = ptr.Get(value)
 	if result != "C" || err != nil {
 		t.Fatalf("Get() = (%v, %v), want (C, <nil>)", result, err)
+	}
+
+	ptr, err = Parse("/A/2")
+	if err != nil {
+		t.Fatalf("Parse(/A/2) = %v, want <nil>", err)
+	}
+
+	value = map[string]any{
+		"A": []any{
+			nil,
+			nil,
+			nil,
+		},
+	}
+
+	result, err = ptr.Get(value)
+	if result != nil || err != nil {
+		t.Fatalf("Get() = (%v, %v), want (<nil>, <nil>)", result, err)
+	}
+
+	value = &D{
+		D: []any{
+			nil,
+			nil,
+			nil,
+		},
+	}
+
+	result, err = ptr.Get(value)
+	if result != nil || err != nil {
+		t.Fatalf("Get() = (%v, %v), want (<nil>, <nil>)", result, err)
 	}
 }
 

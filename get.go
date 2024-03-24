@@ -144,6 +144,13 @@ func get(tok token, value any) (any, bool, error) {
 		}
 
 		return field, true, nil
+	case *map[string]any:
+		field, ok := (*v)[tok.field]
+		if !ok {
+			return nil, false, &valueNotFoundError{tok.field}
+		}
+
+		return field, true, nil
 	case []any:
 		if tok.index == -1 {
 			if tok.field == "-" {
@@ -158,9 +165,49 @@ func get(tok token, value any) (any, bool, error) {
 		}
 
 		return v[tok.index], true, nil
-	default:
-		return value, false, nil
+	case *[]any:
+		if tok.index == -1 {
+			if tok.field == "-" {
+				return nil, false, &arrayIndexOutOfBoundsError{len(*v)}
+			}
+
+			return nil, false, &invalidArrayIndexError{tok.field}
+		}
+
+		if tok.index >= len(*v) {
+			return nil, false, &arrayIndexOutOfBoundsError{len(*v)}
+		}
+
+		return (*v)[tok.index], true, nil
+	case *any:
+		switch v := (*v).(type) {
+		case nil:
+			return nil, false, &valueNotFoundError{tok.field}
+		case map[string]any:
+			field, ok := v[tok.field]
+			if !ok {
+				return nil, false, &valueNotFoundError{tok.field}
+			}
+
+			return field, true, nil
+		case []any:
+			if tok.index == -1 {
+				if tok.field == "-" {
+					return nil, false, &arrayIndexOutOfBoundsError{len(v)}
+				}
+
+				return nil, false, &invalidArrayIndexError{tok.field}
+			}
+
+			if tok.index >= len(v) {
+				return nil, false, &arrayIndexOutOfBoundsError{tok.index}
+			}
+
+			return v[tok.index], true, nil
+		}
 	}
+
+	return value, false, nil
 }
 
 func getReflect(tok token, value *reflect.Value) error {
