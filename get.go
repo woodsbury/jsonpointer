@@ -135,8 +135,6 @@ func (p Pointer) Get(value any) (any, error) {
 
 func get(tok token, value any) (any, bool, error) {
 	switch v := value.(type) {
-	case nil:
-		return nil, false, &valueNotFoundError{tok.field}
 	case map[string]any:
 		field, ok := v[tok.field]
 		if !ok {
@@ -181,8 +179,6 @@ func get(tok token, value any) (any, bool, error) {
 		return (*v)[tok.index], true, nil
 	case *any:
 		switch v := (*v).(type) {
-		case nil:
-			return nil, false, &valueNotFoundError{tok.field}
 		case map[string]any:
 			field, ok := v[tok.field]
 			if !ok {
@@ -204,7 +200,11 @@ func get(tok token, value any) (any, bool, error) {
 			}
 
 			return v[tok.index], true, nil
+		case nil:
+			return nil, false, &valueNotFoundError{tok.field}
 		}
+	case nil:
+		return nil, false, &valueNotFoundError{tok.field}
 	}
 
 	return value, false, nil

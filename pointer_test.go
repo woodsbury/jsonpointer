@@ -43,6 +43,44 @@ func TestParse(t *testing.T) {
 	}
 }
 
+func TestPointerEqual(t *testing.T) {
+	t.Parallel()
+
+	ptrs := []string{
+		"",
+		"/",
+		"//",
+		"/~0",
+		"/~1",
+		"/~01",
+		"/~10",
+		"/0",
+		"/01",
+		"/1",
+		"/a/b/c",
+	}
+
+	var prev Pointer
+	for i, ptr := range ptrs {
+		p, err := Parse(ptr)
+		if err != nil {
+			t.Fatalf("Parse(%s) = %v, want <nil>", ptr, err)
+		}
+
+		if !p.Equal(p) {
+			t.Errorf("Equal() = false, want true")
+		}
+
+		if i != 0 {
+			if p.Equal(prev) {
+				t.Errorf("Equal() = true, want false")
+			}
+		}
+
+		prev = p
+	}
+}
+
 func TestPointerMarshalText(t *testing.T) {
 	t.Parallel()
 

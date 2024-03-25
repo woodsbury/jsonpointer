@@ -63,6 +63,22 @@ func Parse(ptr string) (Pointer, error) {
 	}, nil
 }
 
+// Equal compares two Pointers and reports whether they are equal.
+func (p Pointer) Equal(o Pointer) bool {
+	l := len(p.tokens)
+	if l != len(o.tokens) {
+		return false
+	}
+
+	for i := 0; i < l; i++ {
+		if p.tokens[i] != o.tokens[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (p Pointer) MarshalText() ([]byte, error) {
 	n := len(p.tokens)
