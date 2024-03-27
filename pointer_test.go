@@ -145,6 +145,18 @@ func TestPointerString(t *testing.T) {
 	}
 }
 
+func FuzzParse(f *testing.F) {
+	f.Add("")
+	f.Add("/")
+	f.Add("/a/0")
+
+	f.Fuzz(func(t *testing.T, s string) {
+		t.Parallel()
+
+		Parse(s)
+	})
+}
+
 func BenchmarkParse(b *testing.B) {
 	b.ReportAllocs()
 
