@@ -124,7 +124,7 @@ func (p Pointer) Get(value any) (any, error) {
 	}
 
 	refResult := reflect.ValueOf(result)
-	for i, tok = range p.tokens[i:] {
+	for _, tok = range p.tokens[i:] {
 		if err := getReflect(tok, &refResult); err != nil {
 			return nil, err
 		}
