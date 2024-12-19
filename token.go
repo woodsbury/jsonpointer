@@ -2,7 +2,6 @@ package jsonpointer
 
 import (
 	"bytes"
-	"strconv"
 	"strings"
 )
 
@@ -92,13 +91,10 @@ func parseTokenBytes(tok []byte) (token, error) {
 		tokStr := string(tok)
 
 		if r := tok[0]; r >= '1' && r <= '9' {
-			index, err := strconv.Atoi(tokStr)
-			if err == nil {
-				return token{
-					field: tokStr,
-					index: index,
-				}, nil
-			}
+			return token{
+				field: tokStr,
+				index: atoi(tokStr),
+			}, nil
 		}
 
 		return token{
@@ -107,7 +103,7 @@ func parseTokenBytes(tok []byte) (token, error) {
 		}, nil
 	}
 
-	var b bytes.Buffer
+	var b strings.Builder
 	b.Grow(len(tok))
 	b.Write(tok[:i])
 
@@ -145,6 +141,10 @@ func parseTokenBytes(tok []byte) (token, error) {
 func atoi(s string) int {
 	var n int
 	for _, r := range s {
+		if r < '0' || r > '9' {
+			return -1
+		}
+
 		t := n*10 + int(r-'0')
 		if t < n {
 			return -1
