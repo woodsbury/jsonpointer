@@ -79,6 +79,12 @@ func (p Pointer) Equal(o Pointer) bool {
 	return true
 }
 
+// IsZero reports whether the Pointer is the zero value. A zero Pointer value
+// resolves against the root of a value.
+func (p Pointer) IsZero() bool {
+	return len(p.tokens) == 0
+}
+
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (p Pointer) MarshalText() ([]byte, error) {
 	n := len(p.tokens)
