@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 // Pointer represents a parsed JSON pointer. Parsing a JSON pointer allows it
@@ -63,6 +64,65 @@ func Parse(ptr string) (Pointer, error) {
 	}, nil
 }
 
+// AppendText implements the [encoding.TextAppender] interface.
+func (p Pointer) AppendText(buf []byte) ([]byte, error) {
+	if buf == nil {
+		n := len(p.tokens)
+		for _, tok := range p.tokens {
+			n += len(tok.field)
+		}
+
+		buf = make([]byte, 0, n)
+	}
+
+	for _, tok := range p.tokens {
+		buf = append(buf, '/')
+
+		i := strings.IndexByte(tok.field, '~')
+		j := strings.IndexByte(tok.field, '/')
+		if i == -1 && j == -1 {
+			buf = append(buf, tok.field...)
+			continue
+		}
+
+		var k int
+		if i != -1 && (j == -1 || i < j) {
+			k = i
+		} else {
+			k = j
+		}
+
+		buf = append(buf, tok.field[:k]...)
+		remaining := tok.field[k+1:]
+		for {
+			if i != -1 {
+				buf = append(buf, '~', '0')
+			} else {
+				buf = append(buf, '~', '1')
+			}
+
+			i = strings.IndexByte(remaining, '~')
+			j = strings.IndexByte(remaining, '/')
+			if i == -1 && j == -1 {
+				buf = append(buf, remaining...)
+				break
+			}
+
+			var k int
+			if i != -1 && i < j {
+				k = i
+			} else {
+				k = j
+			}
+
+			buf = append(buf, remaining[:k]...)
+			remaining = remaining[k+1:]
+		}
+	}
+
+	return buf, nil
+}
+
 // Equal compares two Pointers and reports whether they are equal.
 func (p Pointer) Equal(o Pointer) bool {
 	l := len(p.tokens)
@@ -87,60 +147,7 @@ func (p Pointer) IsZero() bool {
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (p Pointer) MarshalText() ([]byte, error) {
-	n := len(p.tokens)
-	for _, tok := range p.tokens {
-		n += len(tok.field)
-	}
-
-	var b bytes.Buffer
-	b.Grow(n)
-
-	for _, tok := range p.tokens {
-		b.WriteByte('/')
-
-		i := strings.IndexByte(tok.field, '~')
-		j := strings.IndexByte(tok.field, '/')
-		if i == -1 && j == -1 {
-			b.WriteString(tok.field)
-			continue
-		}
-
-		var k int
-		if i != -1 && (j == -1 || i < j) {
-			k = i
-		} else {
-			k = j
-		}
-
-		b.WriteString(tok.field[:k])
-		remaining := tok.field[k+1:]
-		for {
-			if i != -1 {
-				b.WriteString("~0")
-			} else {
-				b.WriteString("~1")
-			}
-
-			i = strings.IndexByte(remaining, '~')
-			j = strings.IndexByte(remaining, '/')
-			if i == -1 && j == -1 {
-				b.WriteString(remaining)
-				break
-			}
-
-			var k int
-			if i != -1 && i < j {
-				k = i
-			} else {
-				k = j
-			}
-
-			b.WriteString(remaining[:k])
-			remaining = remaining[k+1:]
-		}
-	}
-
-	return b.Bytes(), nil
+	return p.AppendText(nil)
 }
 
 // String returns a string representation of the Pointer value.
@@ -150,16 +157,15 @@ func (p Pointer) String() string {
 		n += len(tok.field)
 	}
 
-	var b strings.Builder
-	b.Grow(n)
+	buf := make([]byte, 0, n)
 
 	for _, tok := range p.tokens {
-		b.WriteByte('/')
+		buf = append(buf, '/')
 
 		i := strings.IndexByte(tok.field, '~')
 		j := strings.IndexByte(tok.field, '/')
 		if i == -1 && j == -1 {
-			b.WriteString(tok.field)
+			buf = append(buf, tok.field...)
 			continue
 		}
 
@@ -170,19 +176,19 @@ func (p Pointer) String() string {
 			k = j
 		}
 
-		b.WriteString(tok.field[:k])
+		buf = append(buf, tok.field[:k]...)
 		remaining := tok.field[k+1:]
 		for {
 			if i != -1 {
-				b.WriteString("~0")
+				buf = append(buf, '~', '0')
 			} else {
-				b.WriteString("~1")
+				buf = append(buf, '~', '1')
 			}
 
 			i = strings.IndexByte(remaining, '~')
 			j = strings.IndexByte(remaining, '/')
 			if i == -1 && j == -1 {
-				b.WriteString(remaining)
+				buf = append(buf, remaining...)
 				break
 			}
 
@@ -193,12 +199,12 @@ func (p Pointer) String() string {
 				k = j
 			}
 
-			b.WriteString(remaining[:k])
+			buf = append(buf, remaining[:k]...)
 			remaining = remaining[k+1:]
 		}
 	}
 
-	return b.String()
+	return unsafe.String(unsafe.SliceData(buf), len(buf))
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.

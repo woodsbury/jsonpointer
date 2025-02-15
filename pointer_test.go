@@ -112,6 +112,15 @@ func TestPointerMarshalText(t *testing.T) {
 		if !bytes.Equal(d, ptr) {
 			t.Errorf("Pointer.MarshalText() = %s, want %s", d, ptr)
 		}
+
+		d, err = p.AppendText(d[:0])
+		if err != nil {
+			t.Fatalf("Pointer.AppendText() = %v, want <nil>", err)
+		}
+
+		if !bytes.Equal(d, ptr) {
+			t.Errorf("Pointer.AppendText() = %s, want %s", d, ptr)
+		}
 	}
 }
 
@@ -164,6 +173,26 @@ func BenchmarkParse(b *testing.B) {
 		_, err := Parse("/A/2/B")
 		if err != nil {
 			b.Fatalf("Parse() = %v, want <nil>", err)
+		}
+	}
+}
+
+func BenchmarkPointerAppendText(b *testing.B) {
+	b.ReportAllocs()
+
+	p, err := Parse("/A/2/B")
+	if err != nil {
+		b.Fatalf("Parse() = %v, want <nil>", err)
+	}
+
+	var buf []byte
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		var err error
+		buf, err = p.AppendText(buf[:0])
+		if err != nil {
+			b.Fatalf("Pointer.MarshalText() = %v, want <nil>", err)
 		}
 	}
 }
