@@ -169,7 +169,7 @@ func FuzzParse(f *testing.F) {
 func BenchmarkParse(b *testing.B) {
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := Parse("/A/2/B")
 		if err != nil {
 			b.Fatalf("Parse() = %v, want <nil>", err)
@@ -187,8 +187,7 @@ func BenchmarkPointerAppendText(b *testing.B) {
 
 	var buf []byte
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var err error
 		buf, err = p.AppendText(buf[:0])
 		if err != nil {
@@ -205,8 +204,7 @@ func BenchmarkPointerMarshalText(b *testing.B) {
 		b.Fatalf("Parse() = %v, want <nil>", err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := p.MarshalText()
 		if err != nil {
 			b.Fatalf("Pointer.MarshalText() = %v, want <nil>", err)
@@ -222,8 +220,7 @@ func BenchmarkPointerString(b *testing.B) {
 		b.Fatalf("Parse() = %v, want <nil>", err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = p.String()
 	}
 }
@@ -233,8 +230,7 @@ func BenchmarkPointerUnmarshalText(b *testing.B) {
 
 	data := []byte("/A/2/B")
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var p Pointer
 		err := p.UnmarshalText(data)
 		if err != nil {

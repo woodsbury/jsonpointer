@@ -213,8 +213,7 @@ func BenchmarkGetMap(b *testing.B) {
 		},
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := Get("/A/2/B/C", value)
 		if err != nil {
 			b.Fatalf("Get() = %v, want <nil>", err)
@@ -249,8 +248,7 @@ func BenchmarkGetStruct(b *testing.B) {
 		},
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := Get("/A/2/B/C", value)
 		if err != nil {
 			b.Fatalf("Get() = %v, want <nil>", err)
@@ -278,8 +276,7 @@ func BenchmarkPointerGetMap(b *testing.B) {
 		b.Fatalf("Parse(/A/2/B/C) = %v, want <nil>", err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err = ptr.Get(value)
 		if err != nil {
 			b.Fatalf("Pointer.Get() = %v, want <nil>", err)
@@ -319,8 +316,7 @@ func BenchmarkPointerGetStruct(b *testing.B) {
 		b.Fatalf("Parse(/A/2/B/C) = %v, want <nil>", err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err = ptr.Get(value)
 		if err != nil {
 			b.Fatalf("Pointer.Get() = %v, want <nil>", err)
