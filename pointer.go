@@ -37,7 +37,7 @@ func Parse(ptr string) (Pointer, error) {
 	remaining := ptr[1:]
 	count := strings.Count(remaining, "/")
 	tokens := make([]token, count+1)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		next := strings.IndexByte(remaining, '/')
 		if next == -1 {
 			return Pointer{}, &invalidPointerError{ptr}
@@ -130,7 +130,7 @@ func (p Pointer) Equal(o Pointer) bool {
 		return false
 	}
 
-	for i := 0; i < l; i++ {
+	for i := range l {
 		if p.tokens[i] != o.tokens[i] {
 			return false
 		}
@@ -148,6 +148,11 @@ func (p Pointer) IsZero() bool {
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (p Pointer) MarshalText() ([]byte, error) {
 	return p.AppendText(nil)
+}
+
+// NumTokens returns the number of reference tokens in the Pointer value.
+func (p Pointer) NumTokens() int {
+	return len(p.tokens)
 }
 
 // String returns a string representation of the Pointer value.
@@ -207,6 +212,26 @@ func (p Pointer) String() string {
 	return unsafe.String(unsafe.SliceData(buf), len(buf))
 }
 
+// Token returns the reference token at the index i. Token returns an empty
+// string if the requested index doesn't exist.
+func (p Pointer) Token(i int) string {
+	if i < 0 || i >= len(p.tokens) {
+		return ""
+	}
+
+	return p.tokens[i].field
+}
+
+// Tokens returns the reference tokens of the Pointer value.
+func (p Pointer) Tokens() []string {
+	tokens := make([]string, len(p.tokens))
+	for i, tok := range p.tokens {
+		tokens[i] = tok.field
+	}
+
+	return tokens
+}
+
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (p *Pointer) UnmarshalText(data []byte) error {
 	if len(data) == 0 {
@@ -228,7 +253,7 @@ func (p *Pointer) UnmarshalText(data []byte) error {
 		tokens = p.tokens[:count+1]
 	}
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		next := bytes.IndexByte(remaining, '/')
 		if next == -1 {
 			return &invalidPointerError{string(data)}
