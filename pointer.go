@@ -232,6 +232,22 @@ func (p Pointer) Tokens() []string {
 	return tokens
 }
 
+// Trim removes the first count tokens from the Pointer value and returns the
+// result.
+func (p Pointer) Trim(count int) Pointer {
+	if count <= 0 {
+		return p
+	}
+
+	if count >= len(p.tokens) {
+		return Pointer{}
+	}
+
+	return Pointer{
+		tokens: p.tokens[:count],
+	}
+}
+
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (p *Pointer) UnmarshalText(data []byte) error {
 	if len(data) == 0 {
