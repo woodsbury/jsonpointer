@@ -244,7 +244,7 @@ func (p Pointer) Trim(count int) Pointer {
 	}
 
 	return Pointer{
-		tokens: p.tokens[:count],
+		tokens: p.tokens[count:],
 	}
 }
 

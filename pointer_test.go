@@ -3,6 +3,7 @@ package jsonpointer
 import (
 	"bytes"
 	"errors"
+	"slices"
 	"testing"
 )
 
@@ -151,6 +152,35 @@ func TestPointerString(t *testing.T) {
 		if s != ptr {
 			t.Errorf("Pointer.String() = %s, want %s", s, ptr)
 		}
+	}
+}
+
+func TestPointerTrim(t *testing.T) {
+	t.Parallel()
+
+	p, err := Parse("/a/b/c")
+	if err != nil {
+		t.Fatalf("Parse(/a/b/c) = %v, want <nil>", err)
+	}
+
+	if p.Token(0) != "a" {
+		t.Errorf("Pointer.Token(0) = %s, want %s", p.Token(0), "a")
+	}
+
+	toks := p.Tokens()
+	if !slices.Equal(toks, []string{"a", "b", "c"}) {
+		t.Errorf("Pointer.Tokens() = %v, want %v", toks, []string{"a", "b", "c"})
+	}
+
+	p = p.Trim(1)
+
+	if p.Token(0) != "b" {
+		t.Errorf("Pointer.Trim(1).Token(0) = %s, want %s", p.Token(0), "b")
+	}
+
+	toks = p.Tokens()
+	if !slices.Equal(toks, []string{"b", "c"}) {
+		t.Errorf("Pointer.Trim(1).Tokens() = %v, want %v", toks, []string{"b", "c"})
 	}
 }
 
