@@ -106,7 +106,7 @@ func (p Pointer) Get(value any) (any, error) {
 
 	var i int
 	var tok token
-	var ok bool
+	ok := true
 	for i, tok = range p.tokens {
 		var err error
 		result, ok, err = get(tok, result)

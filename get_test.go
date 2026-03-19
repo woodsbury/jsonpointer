@@ -323,3 +323,27 @@ func BenchmarkPointerGetStruct(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkPointerGetZero(b *testing.B) {
+	b.ReportAllocs()
+
+	var value any = map[string]any{
+		"A": []any{
+			map[string]any{},
+			map[string]any{},
+			map[string]any{
+				"B": map[string]any{
+					"C": "D",
+				},
+			},
+		},
+	}
+
+	var ptr Pointer
+	for b.Loop() {
+		_, err := ptr.Get(value)
+		if err != nil {
+			b.Fatalf("Pointer.Get() = %v, want <nil>", err)
+		}
+	}
+}

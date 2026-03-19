@@ -52,7 +52,7 @@ func getStructFields(t reflect.Type) structFields {
 			visited[f.t] = struct{}{}
 
 			n := f.t.NumField()
-			for i := 0; i < n; i++ {
+			for i := range n {
 				sf := f.t.Field(i)
 				if sf.Anonymous {
 					ft := sf.Type
