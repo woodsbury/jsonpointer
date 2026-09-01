@@ -117,7 +117,7 @@ func TestPointerGet(t *testing.T) {
 
 	result, err := ptr.Get(value)
 	if result != "C" || err != nil {
-		t.Fatalf("Get() = (%v, %v), want (C, <nil>)", result, err)
+		t.Fatalf("Pointer.Get() = (%v, %v), want (C, <nil>)", result, err)
 	}
 
 	type B struct {
@@ -140,7 +140,7 @@ func TestPointerGet(t *testing.T) {
 
 	result, err = ptr.Get(value)
 	if result != "C" || err != nil {
-		t.Fatalf("Get() = (%v, %v), want (C, <nil>)", result, err)
+		t.Fatalf("Pointer.Get() = (%v, %v), want (C, <nil>)", result, err)
 	}
 
 	type E struct {
@@ -163,7 +163,7 @@ func TestPointerGet(t *testing.T) {
 
 	result, err = ptr.Get(value)
 	if result != "C" || err != nil {
-		t.Fatalf("Get() = (%v, %v), want (C, <nil>)", result, err)
+		t.Fatalf("Pointer.Get() = (%v, %v), want (C, <nil>)", result, err)
 	}
 
 	ptr, err = Parse("/A/2")
@@ -181,7 +181,7 @@ func TestPointerGet(t *testing.T) {
 
 	result, err = ptr.Get(value)
 	if result != nil || err != nil {
-		t.Fatalf("Get() = (%v, %v), want (<nil>, <nil>)", result, err)
+		t.Fatalf("Pointer.Get() = (%v, %v), want (<nil>, <nil>)", result, err)
 	}
 
 	value = &D{
@@ -194,7 +194,7 @@ func TestPointerGet(t *testing.T) {
 
 	result, err = ptr.Get(value)
 	if result != nil || err != nil {
-		t.Fatalf("Get() = (%v, %v), want (<nil>, <nil>)", result, err)
+		t.Fatalf("Pointer.Get() = (%v, %v), want (<nil>, <nil>)", result, err)
 	}
 }
 

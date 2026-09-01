@@ -60,6 +60,18 @@ func (err *invalidTokenError) Is(target error) bool {
 	return target == ErrInvalidPointer
 }
 
+type jsonDecodeError struct {
+	err error
+}
+
+func (err *jsonDecodeError) Error() string {
+	return "jsonpointer: error decoding json: " + err.err.Error()
+}
+
+func (err *jsonDecodeError) Unwrap() error {
+	return err.err
+}
+
 type valueNotFoundError struct {
 	tok string
 }
